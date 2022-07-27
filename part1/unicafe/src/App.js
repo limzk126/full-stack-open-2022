@@ -10,30 +10,12 @@ const Statistics = ({ good, neutral, bad }) => {
   return (
     <table>
       <tbody>
-        <tr>
-          <td>good</td>
-          <td>{good}</td>
-        </tr>
-        <tr>
-          <td>neutral</td>
-          <td>{neutral}</td>
-        </tr>
-        <tr>
-          <td>bad</td>
-          <td>{bad}</td>
-        </tr>
-        <tr>
-          <td>all</td>
-          <td>{all}</td>
-        </tr>
-        <tr>
-          <td>average</td>
-          <td>{average}</td>
-        </tr>
-        <tr>
-          <td>positive</td>
-          <td>{`${positive} %`}</td>
-        </tr>
+        <Part name="good" value={good} />
+        <Part name="neutral" value={neutral} />
+        <Part name="bad" value={bad} />
+        <Part name="all" value={all} />
+        <Part name="average" value={average} />
+        <Part name="positive" value={`${positive} %`} />
       </tbody>
     </table>
   );
@@ -71,12 +53,13 @@ const Button = ({ content, onClick }) => (
   </>
 );
 
-const Part = (prop) => {
+const Part = ({ name, value }) => {
   return (
     <>
-      <p>
-        {prop.name} {prop.value}
-      </p>
+      <tr>
+        <td>{name}</td>
+        <td>{value}</td>
+      </tr>
     </>
   );
 };
