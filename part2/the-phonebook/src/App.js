@@ -1,9 +1,10 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
 
 const App = () => {
-  const [persons, setPersons] = useState([{ name: "Arto Hellas" }]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterName, setFilterName] = useState("");
@@ -17,7 +18,6 @@ const App = () => {
   const handleFilterNameChange = (event) => {
     setFilterName(event.target.value);
   };
-
   const addNewPerson = (event) => {
     event.preventDefault();
     if (persons.find((person) => person.name === newName)) {
@@ -29,6 +29,12 @@ const App = () => {
     setNewName("");
     setNewNumber("");
   };
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((persons) => {
+      setPersons(persons.data);
+    });
+  }, []);
 
   return (
     <div>
@@ -56,13 +62,13 @@ const Persons = ({ persons, filterValue }) => {
   const filterPred = (person) =>
     person.name.toLowerCase().includes(filterValue.toLowerCase());
 
-  return (
-    <div>
-      {persons.filter(filterPred).map((person) => (
-        <Person key={uuid()} person={person} />
-      ))}
-    </div>
-  );
+  const displayPersons = () => {
+    return persons
+      .filter(filterPred)
+      .map((person) => <Person key={uuid()} person={person} />);
+  };
+
+  return <div>{displayPersons()}</div>;
 };
 
 const Person = ({ person }) => (
