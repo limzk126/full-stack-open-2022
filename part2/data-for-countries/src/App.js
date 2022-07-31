@@ -53,10 +53,10 @@ const Countries = ({
   }
 
   const filterPred = (country) => {
-    let matchCommon = country.name.common
+    const matchCommon = country.name.common
       .toLowerCase()
       .includes(searchInput.toLowerCase());
-    let matchOfficial = country.name.official
+    const matchOfficial = country.name.official
       .toLowerCase()
       .includes(searchInput.toLowerCase());
 
