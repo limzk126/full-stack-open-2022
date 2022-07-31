@@ -33,35 +33,68 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with:{" "}
-        <input value={filterName} onChange={handleFilterNameChange} />
-      </div>
+      <Filter
+        text="filter shown with"
+        value={filterName}
+        onChangeEventHandler={handleFilterNameChange}
+      />
       <h2>add a new</h2>
-      <form onSubmit={addNewPerson}>
+      <PersonForm
+        name={newName}
+        nameChangeHandler={handleNameChange}
+        number={newNumber}
+        numberChangeHandler={handleNumberChange}
+        onSubmit={addNewPerson}
+      />
+      <h2>Numbers</h2>
+      <Persons persons={persons} filterValue={filterName} />
+    </div>
+  );
+};
+
+const Persons = ({ persons, filterValue }) => {
+  const filterPred = (person) =>
+    person.name.toLowerCase().includes(filterValue.toLowerCase());
+
+  return (
+    <div>
+      {persons.filter(filterPred).map((person) => (
+        <Person key={uuid()} person={person} />
+      ))}
+    </div>
+  );
+};
+
+const Person = ({ person }) => (
+  <p>
+    {person.name} {person.number}
+  </p>
+);
+
+const Filter = ({ text, value, onChangeEventHandler }) => {
+  return (
+    <div>
+      {text}: <input value={value} onChange={onChangeEventHandler} />
+    </div>
+  );
+};
+
+const PersonForm = (prop) => {
+  return (
+    <>
+      <form onSubmit={prop.onSubmit}>
         <div>
-          name: <input value={newName} onChange={handleNameChange} />
+          name: <input value={prop.name} onChange={prop.nameChangeHandler} />
         </div>
         <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
+          number:{" "}
+          <input value={prop.number} onChange={prop.numberChangeHandler} />
         </div>
         <div>
           <button type="submit">add</button>
         </div>
       </form>
-      <h2>Numbers</h2>
-      <div>
-        {persons
-          .filter((person) =>
-            person.name.toLowerCase().includes(filterName.toLowerCase())
-          )
-          .map((person) => (
-            <p key={uuid()}>
-              {person.name} {person.number}
-            </p>
-          ))}
-      </div>
-    </div>
+    </>
   );
 };
 
