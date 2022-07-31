@@ -45,10 +45,9 @@ const Countries = ({
   setSelectedCountry,
 }) => {
   if (selectedCountry !== null) {
-    const tmp = selectedCountry;
     return (
       <div>
-        <CountryInfo country={tmp} />
+        <CountryInfo country={selectedCountry} />
       </div>
     );
   }
@@ -78,13 +77,15 @@ const Countries = ({
 
   return (
     <div>
-      {filteredCountries.map((country) => (
-        <Country
-          key={uuid()}
-          country={country}
-          setSelectedCountry={setSelectedCountry}
-        />
-      ))}
+      {filteredCountries.map((country) => {
+        return (
+          <Country
+            key={uuid()}
+            country={country}
+            setSelectedCountry={setSelectedCountry}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -99,20 +100,62 @@ const Country = ({ country, setSelectedCountry }) => {
 };
 
 const CountryInfo = ({ country }) => {
+  const [weather, setWeather] = useState(null);
+
+  const effect = () => {
+    const lat = country.latlng[0];
+    const lon = country.latlng[1];
+    const apiKey = process.env.REACT_APP_API_KEY;
+
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+      )
+      .then((data) => {
+        console.log("weather ...........", data);
+        setWeather(data);
+      });
+  };
+
+  useEffect(effect, [country]);
+
   return (
     <div>
       <h1>{country.name.official}</h1>
       <div>Capital {country.capital[0]}</div>
       <div>Area {country.area}</div>
       <h3>languages:</h3>
-      <div>
-        <ul>
-          {Object.keys(country.languages).map((key) => (
-            <li key={uuid()}>{country.languages[key]}</li>
-          ))}
-        </ul>
-      </div>
+      <Languages languages={country.languages} />
       <img src={country.flags.png} alt="" />
+      <Weather capital={country.capital[0]} weather={weather} />
+    </div>
+  );
+};
+
+const Weather = ({ capital, weather }) => {
+  if (!weather) return;
+
+  return (
+    <div>
+      <h2>Weather in {capital}</h2>
+      <div>temperature {weather.data.main.temp} Celcius</div>
+      <img
+        src={`http://openweathermap.org/img/wn/${weather.data.weather[0].icon}@2x.png`}
+        alt=""
+      />
+      <div>wind {weather.data.wind.speed} m/s</div>
+    </div>
+  );
+};
+
+const Languages = ({ languages }) => {
+  return (
+    <div>
+      <ul>
+        {Object.keys(languages).map((key) => (
+          <li key={uuid()}>{languages[key]}</li>
+        ))}
+      </ul>
     </div>
   );
 };
