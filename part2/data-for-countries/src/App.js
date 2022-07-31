@@ -6,8 +6,12 @@ import { v4 as uuid } from "uuid";
 function App() {
   const [countries, setCountries] = useState([]);
   const [searchInput, setSearchInput] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
-  const searchInputHandler = (event) => setSearchInput(event.target.value);
+  const searchInputHandler = (event) => {
+    setSearchInput(event.target.value);
+    setSelectedCountry(null);
+  };
 
   useEffect(() => {
     axios.get("https://restcountries.com/v3.1/all").then((countries) => {
@@ -23,13 +27,32 @@ function App() {
         <input value={searchInput} onChange={searchInputHandler} />
       </div>
       <div>
-        <Countries countries={countries} searchInput={searchInput} />
+        <Countries
+          countries={countries}
+          searchInput={searchInput}
+          selectedCountry={selectedCountry}
+          setSelectedCountry={setSelectedCountry}
+        />
       </div>
     </div>
   );
 }
 
-const Countries = ({ countries, searchInput }) => {
+const Countries = ({
+  countries,
+  searchInput,
+  selectedCountry,
+  setSelectedCountry,
+}) => {
+  if (selectedCountry !== null) {
+    const tmp = selectedCountry;
+    return (
+      <div>
+        <CountryInfo country={tmp} />
+      </div>
+    );
+  }
+
   const filterPred = (country) => {
     let matchCommon = country.name.common
       .toLowerCase()
@@ -42,11 +65,10 @@ const Countries = ({ countries, searchInput }) => {
   };
   const filteredCountries = countries.filter(filterPred);
 
-  console.log("filtered countries...", filteredCountries);
   if (filteredCountries.length === 1) {
     return (
       <div>
-        <Country country={filteredCountries[0]} />
+        <CountryInfo country={filteredCountries[0]} />
       </div>
     );
   }
@@ -57,26 +79,42 @@ const Countries = ({ countries, searchInput }) => {
   return (
     <div>
       {filteredCountries.map((country) => (
-        <p key={uuid()}>{country.name.official}</p>
+        <Country
+          key={uuid()}
+          country={country}
+          setSelectedCountry={setSelectedCountry}
+        />
       ))}
     </div>
   );
 };
 
-const Country = ({ country }) => {
+const Country = ({ country, setSelectedCountry }) => {
+  return (
+    <div>
+      {country.name.official}{" "}
+      <button onClick={() => setSelectedCountry(country)}>show</button>
+    </div>
+  );
+};
+
+const CountryInfo = ({ country }) => {
   return (
     <div>
       <h1>{country.name.official}</h1>
-      <p>Capital {country.capital[0]}</p>
-      <p>Area {country.area}</p>
+      <div>Capital {country.capital[0]}</div>
+      <div>Area {country.area}</div>
       <h3>languages:</h3>
       <div>
-        {Object.keys(country.languages).map((key) => (
-          <ul key={uuid()}>{country.languages[key]}</ul>
-        ))}
+        <ul>
+          {Object.keys(country.languages).map((key) => (
+            <li key={uuid()}>{country.languages[key]}</li>
+          ))}
+        </ul>
       </div>
       <img src={country.flags.png} alt="" />
     </div>
   );
 };
+
 export default App;
