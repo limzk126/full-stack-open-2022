@@ -1,7 +1,7 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-import axios from "axios";
+import personService from "./services/person";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -25,14 +25,20 @@ const App = () => {
       return;
     }
 
-    setPersons(persons.concat({ name: newName, number: newNumber }));
+    const newObject = { name: newName, number: newNumber };
+
+    personService
+      .create(newObject)
+      .then((data) => console.log("create response", data));
+
+    setPersons(persons.concat(newObject));
     setNewName("");
     setNewNumber("");
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((persons) => {
-      setPersons(persons.data);
+    personService.getAll().then((persons) => {
+      setPersons(persons);
     });
   }, []);
 
