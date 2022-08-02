@@ -35,6 +35,12 @@ const App = () => {
     setNewName("");
     setNewNumber("");
   };
+  const deletePerson = (personToDelete) => {
+    if (window.confirm(`Delete ${personToDelete.name}`)) {
+      personService.deletePerson(personToDelete.id);
+      setPersons(persons.filter((person) => person.id !== personToDelete.id));
+    }
+  };
 
   useEffect(() => {
     personService.getAll().then((persons) => {
@@ -59,29 +65,39 @@ const App = () => {
         onSubmit={addNewPerson}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} filterValue={filterName} />
+      <Persons
+        persons={persons}
+        filterValue={filterName}
+        onDelete={deletePerson}
+      />
     </div>
   );
 };
 
-const Persons = ({ persons, filterValue }) => {
+const Persons = ({ persons, filterValue, onDelete }) => {
   const filterPred = (person) =>
     person.name.toLowerCase().includes(filterValue.toLowerCase());
 
   const displayPersons = () => {
     return persons
       .filter(filterPred)
-      .map((person) => <Person key={uuid()} person={person} />);
+      .map((person) => (
+        <Person key={uuid()} person={person} onDelete={onDelete} />
+      ));
   };
 
   return <div>{displayPersons()}</div>;
 };
 
-const Person = ({ person }) => (
-  <p>
-    {person.name} {person.number}
-  </p>
-);
+const Person = ({ person, onDelete }) => {
+  const uniqueOnDelete = (personToDelete) => () => onDelete(personToDelete);
+  return (
+    <div>
+      {person.name} {person.number}{" "}
+      <button onClick={uniqueOnDelete(person)}>delete</button>
+    </div>
+  );
+};
 
 const Filter = ({ text, value, onChangeEventHandler }) => {
   return (
