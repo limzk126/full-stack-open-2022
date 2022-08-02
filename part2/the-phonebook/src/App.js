@@ -20,32 +20,56 @@ const App = () => {
   };
   const addNewPerson = (event) => {
     event.preventDefault();
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook!`);
+    const newObject = { name: newName, number: newNumber };
+
+    const duplicate = persons.find((person) => person.name === newName);
+    if (duplicate) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        console.log("the duplicate ...", duplicate);
+        personService
+          .updatePerson(duplicate.id, newObject)
+          .then((responseObject) => {
+            setPersons(
+              persons.map((person) =>
+                person.name === newName ? responseObject : person
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch((err) => alert(`Failed to update ${duplicate.name}`));
+      }
+
       return;
     }
 
-    const newObject = { name: newName, number: newNumber };
-
-    personService
-      .create(newObject)
-      .then((data) => console.log("create response", data));
-
-    setPersons(persons.concat(newObject));
+    personService.createPerson(newObject).then((responseObject) => {
+      setPersons(persons.concat(responseObject));
+    });
     setNewName("");
     setNewNumber("");
   };
   const deletePerson = (personToDelete) => {
     if (window.confirm(`Delete ${personToDelete.name}`)) {
-      personService.deletePerson(personToDelete.id);
+      personService
+        .deletePerson(personToDelete.id)
+        .catch((err) => alert(`failed to delete ${personToDelete.name}.`));
+
       setPersons(persons.filter((person) => person.id !== personToDelete.id));
     }
   };
 
   useEffect(() => {
-    personService.getAll().then((persons) => {
-      setPersons(persons);
-    });
+    personService
+      .getAllPerson()
+      .then((persons) => {
+        setPersons(persons);
+      })
+      .catch((err) => alert("Failed to retrieve people."));
   }, []);
 
   return (
