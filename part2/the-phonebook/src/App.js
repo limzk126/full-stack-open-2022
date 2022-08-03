@@ -8,6 +8,22 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterName, setFilterName] = useState("");
+  const [message, setMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const displayMessage = (msg) => {
+    setMessage(msg);
+    setTimeout(() => {
+      setMessage(null);
+    }, 5000);
+  };
+
+  const displayErrorMessage = (errMsg) => {
+    setErrorMessage(errMsg);
+    setTimeout(() => {
+      setMessage(null);
+    }, 5000);
+  };
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -29,7 +45,6 @@ const App = () => {
           `${newName} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        console.log("the duplicate ...", duplicate);
         personService
           .updatePerson(duplicate.id, newObject)
           .then((responseObject) => {
@@ -38,10 +53,16 @@ const App = () => {
                 person.name === newName ? responseObject : person
               )
             );
+            displayMessage(`Updated ${duplicate.name}`);
             setNewName("");
             setNewNumber("");
           })
-          .catch((err) => alert(`Failed to update ${duplicate.name}`));
+          .catch((err) => {
+            console.log("eererer");
+            displayErrorMessage(
+              `${duplicate.name} has already been removed from the server`
+            );
+          });
       }
 
       return;
@@ -49,6 +70,7 @@ const App = () => {
 
     personService.createPerson(newObject).then((responseObject) => {
       setPersons(persons.concat(responseObject));
+      displayMessage(`Added ${responseObject.name}`);
     });
     setNewName("");
     setNewNumber("");
@@ -57,9 +79,13 @@ const App = () => {
     if (window.confirm(`Delete ${personToDelete.name}`)) {
       personService
         .deletePerson(personToDelete.id)
+        .then((responseObject) => {
+          setPersons(
+            persons.filter((person) => person.id !== personToDelete.id)
+          );
+          displayMessage(`Deleted ${personToDelete.name}`);
+        })
         .catch((err) => alert(`failed to delete ${personToDelete.name}.`));
-
-      setPersons(persons.filter((person) => person.id !== personToDelete.id));
     }
   };
 
@@ -75,6 +101,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
+      <ErrorNotification message={errorMessage} />
       <Filter
         text="filter shown with"
         value={filterName}
@@ -96,6 +124,42 @@ const App = () => {
       />
     </div>
   );
+};
+
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  const NotificationStyle = {
+    color: "green",
+    background: "lightgrey",
+    fontSize: 20,
+    borderStyle: "solid",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  };
+
+  return <div style={NotificationStyle}>{message}</div>;
+};
+
+const ErrorNotification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  const NotificationStyle = {
+    color: "red",
+    background: "lightgrey",
+    fontSize: 20,
+    borderStyle: "solid",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  };
+
+  return <div style={NotificationStyle}>{message}</div>;
 };
 
 const Persons = ({ persons, filterValue, onDelete }) => {
