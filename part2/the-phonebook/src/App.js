@@ -21,7 +21,7 @@ const App = () => {
   const displayErrorMessage = (errMsg) => {
     setErrorMessage(errMsg);
     setTimeout(() => {
-      setMessage(null);
+      setErrorMessage(null);
     }, 5000);
   };
 
@@ -58,23 +58,26 @@ const App = () => {
             setNewNumber("");
           })
           .catch((err) => {
-            console.log("eererer");
-            displayErrorMessage(
-              `${duplicate.name} has already been removed from the server`
-            );
+            displayErrorMessage(err.response.data.error);
           });
       }
 
       return;
     }
 
-    personService.createPerson(newObject).then((responseObject) => {
-      setPersons(persons.concat(responseObject));
-      displayMessage(`Added ${responseObject.name}`);
-    });
+    personService
+      .createPerson(newObject)
+      .then((responseObject) => {
+        setPersons(persons.concat(responseObject));
+        displayMessage(`Added ${responseObject.name}`);
+      })
+      .catch((err) => {
+        displayErrorMessage(err.response.data.error);
+      });
     setNewName("");
     setNewNumber("");
   };
+
   const deletePerson = (personToDelete) => {
     if (window.confirm(`Delete ${personToDelete.name}`)) {
       personService
@@ -163,8 +166,11 @@ const ErrorNotification = ({ message }) => {
 };
 
 const Persons = ({ persons, filterValue, onDelete }) => {
-  const filterPred = (person) =>
-    person.name.toLowerCase().includes(filterValue.toLowerCase());
+  console.log("persons called.......");
+  const filterPred = (person) => {
+    console.log("da person.....", person);
+    return person.name.toLowerCase().includes(filterValue.toLowerCase());
+  };
 
   const displayPersons = () => {
     return persons
