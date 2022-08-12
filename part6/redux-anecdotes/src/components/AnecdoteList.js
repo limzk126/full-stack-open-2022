@@ -25,11 +25,12 @@ const AnecdoteList = () => {
       dispatch(removeNotification());
     }, 5000);
   };
-
+  console.log('asdasdasd', anecdotes);
   return (
     <div>
       {anecdotes
         .filter((a) => {
+          console.log(a);
           return a.content.toLowerCase().includes(filter.toLowerCase());
         })
         .map((anecdote) => (
