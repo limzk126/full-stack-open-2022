@@ -5,6 +5,8 @@ import {
   Route,
   Link,
   useMatch,
+  useNavigate,
+  Navigate,
 } from 'react-router-dom';
 
 const Menu = () => {
@@ -31,8 +33,8 @@ const AnecdoteList = ({ anecdotes }) => (
     <h2>Anecdotes</h2>
     <ul>
       {anecdotes.map((anecdote) => (
-        <Link to={`/anecdotes/${anecdote.id}`}>
-          <li key={anecdote.id}>{anecdote.content}</li>
+        <Link to={`/anecdotes/${anecdote.id}`} key={anecdote.id}>
+          <li>{anecdote.content}</li>
         </Link>
       ))}
     </ul>
@@ -76,6 +78,7 @@ const CreateNew = (props) => {
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [info, setInfo] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -85,6 +88,7 @@ const CreateNew = (props) => {
       info,
       votes: 0,
     });
+    navigate('/');
   };
 
   return (
@@ -148,6 +152,10 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000);
     setAnecdotes(anecdotes.concat(anecdote));
+    setNotification(`a new anecdote ${anecdote.content} created!`);
+    setTimeout(() => {
+      setNotification('');
+    }, 5000);
   };
 
   const anecdoteById = (id) => anecdotes.find((a) => a.id === id);
@@ -173,6 +181,7 @@ const App = () => {
       <div>
         <h1>Software anecdotes</h1>
         <Menu />
+        <div>{notification}</div>
         <Routes>
           <Route
             path="/anecdotes/:id"
